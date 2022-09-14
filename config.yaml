@@ -105,7 +105,7 @@ params:
       enable: yes
       gravatarEmail: ''
       social: yes
-      subtitle: Hi, this is Nithish Kumar.
+      subtitle: 'Hi, this is Nithish Kumar.'
       title: ''
       typeit: yes
     rss: 10
@@ -475,7 +475,7 @@ languages:
         GitHub: 'nithishkumarakula'
         Instagram: 'nithishkumar_akula'
         Phone: 555-555-555
-        Telegram: 'xxxx'
+        Telegram: 'ANK2KEN'
     weight: 1
   zh-cn:
     copyright: This work is licensed under a Creative Commons Attribution-NonCommercial
@@ -544,5 +544,5 @@ languages:
         GitHub: 'nithishkumarakula'
         Instagram: 'nithishkumar_akula'
         Phone: 555-555-555
-        Telegram: 'xxxx'
+        Telegram: 'ANK2KEN'
     weight: 2
