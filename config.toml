@@ -2,7 +2,7 @@
 baseURL = "https://nithishkumarakula.netlify.app/"
 languageCode = "en-us"
 title = "Forty"
-theme = "forty"
+theme = "anatole"
 
 # Enter your tracking code to enable Google Analytics
 googleAnalytics = ""
