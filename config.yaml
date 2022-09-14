@@ -452,7 +452,7 @@ languages:
           enable: yes
           gravatarEmail: ''
           social: yes
-          subtitle: A Clean, Elegant but Advanced Hugo Theme
+          subtitle: 'Hi, this is Nithish Kumar.'
           title: ''
           typeit: yes
         rss: 10
