@@ -1,7 +1,7 @@
 # Site settings
 baseURL = "https://nithishkumarakula.netlify.app/"
 languageCode = "en-us"
-title = "Forty"
+title = "ANK"
 theme = "uBlogger"
 
 # Enter your tracking code to enable Google Analytics
@@ -19,7 +19,7 @@ disqusShortname = ""
   # CSS class.
 
   # Provide your metadata here.
-  name = "Your name"
+  name = "Nithish Kumar"
   description = "Your description"
 
   # Link custom assets relative to /static
