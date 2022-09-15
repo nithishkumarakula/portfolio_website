@@ -1,8 +1,8 @@
 ---
-title: "Excess rentals in TfL bike sharing"
+title: "GDP components over time and among countries"
 author: "Nithish Kumar"
 date: "`r Sys.Date()`"
-tags: ["Markdown"]
+tags: ["Markdown", "GDP"]
 output:
   html_document:
     theme: flatly
@@ -135,10 +135,8 @@ tidy_GDP_data2 <- tidy_GDP_data %>%
   mutate(GDP_calculated = Gross_capital_formation + Net_exports + Government_expenditure + Household_expenditure)
 
 # Find out % difference between calculated GDP and GDP from raw data
-tidy_GDP_data2 %>% 
-  summarise(sum_GDP_raw_data = sum(GDP_from_raw_data), 
-            sum_GDP_calculated = sum(GDP_calculated)) %>% 
-  mutate(difference = sum_GDP_calculated/sum_GDP_raw_data-1)
+tidy_GDP_data2 <- tidy_GDP_data2 %>% 
+  mutate(sum_GDP_calculated = sum(GDP_calculated))
 
 # Continue with plot
 tidy_GDP_data3 <- tidy_GDP_data2 %>% 
@@ -164,7 +162,6 @@ ggplot(tidy_GDP_data3, aes(x = year, y = value, group = indicator, color = indic
        y = "Proportion", 
        x = NULL)
 
-head(tidy_GDP_data3)
 ```
 
 These are our observations from keenly observing these graphs for United
