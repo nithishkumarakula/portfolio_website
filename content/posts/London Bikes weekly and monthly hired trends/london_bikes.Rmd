@@ -129,7 +129,7 @@ ggplot(final_data,
 Now, let's examine the percentage changes from the expected level of
 weekly rentals.
 
-```{r tfl_percent_change_output}
+```{r tfl_percent_change_output, out.width="100%"}
 # Calculate the average of weekly bikes hired from 2016 to 2019
 avg_weekly_bikes_hired_2016_2019 <- bike %>% 
   filter(year >= 2016, year <= 2019) %>% 
@@ -178,7 +178,7 @@ per week or month between 2016-2019 and then, see how each week/month of
 2020-2022 compares to the expected rentals. Think of the calculation
 `excess_rentals = actual_rentals - expected_rentals`.
 
-```{r excess_rentals}
+```{r excess_rentals_1, out.width="100%"}
 # Calculate the expected median monthly bikes hired
 expected_monthly_bikes_hired_2016_2019 <- bike %>% 
   filter(year >= 2016, year <= 2019) %>% 
@@ -204,7 +204,9 @@ ggplot(excess_monthly_rentals_data,
        x = "month",
        y = "Excess rentals") +
   theme_minimal()
+```
 
+```{r excess_rentals_2, out.width="100%"}
 # Calculate the expected median weekly bikes hired
 expected_weekly_bikes_hired_2016_2019 <- bike %>% 
   filter(year >= 2016, year <= 2019) %>% 
