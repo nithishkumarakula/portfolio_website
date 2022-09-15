@@ -3,6 +3,7 @@ title: "GDP components over time and among countries"
 author: "Nithish Kumar"
 date: "`r Sys.Date()`"
 tags: ["Markdown", "GDP"]
+categories: ["Assignment"]
 output:
   html_document:
     theme: flatly
