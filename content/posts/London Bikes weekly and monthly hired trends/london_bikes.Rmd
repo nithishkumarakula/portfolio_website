@@ -1,0 +1,228 @@
+---
+title: "Excess rentals in TfL bike sharing"
+author: "Nithish Kumar"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, setup, echo=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+```{r load-libraries, echo=FALSE}
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(here)
+library(skimr)
+library(janitor)
+library(httr)
+library(readxl)
+library(vroom)
+library(infer)
+library(tibble)
+```
+
+We often use TFL bike rides, but the frequency with which varies on
+various factors. Lets pull the data from TFL and examine the variance in
+the bikes hired from the expected monthly and weekly rentals.
+
+Let's pull the TFL data from their data repository, and perform EDA on
+this.
+
+```{r, get_tfl_data, cache=TRUE}
+url <- "https://data.london.gov.uk/download/number-bicycle-hires/ac29363e-e0cb-47cc-a97a-e216d900a6b0/tfl-daily-cycle-hires.xlsx"
+
+# Download TFL data to temporary file
+httr::GET(url, write_disk(bike.temp <- tempfile(fileext = ".xlsx")))
+
+# Use read_excel to read it as dataframe
+bike0 <- read_excel(bike.temp,
+                   sheet = "Data",
+                   range = cell_cols("A:B"))
+
+# change dates to get year, month, and week
+bike <- bike0 %>% 
+  clean_names() %>% 
+  rename (bikes_hired = number_of_bicycle_hires) %>% 
+  mutate (year = year(day),
+          month = lubridate::month(day, label = TRUE),
+          week = isoweek(day))
+```
+
+Let's examine how the graphs looks like for the monthly bikes hired from
+2017 to current year in comparision to the average bikes hired from 2016
+to 2019, which acts as our expected rentals parameter.
+
+```{r tfl_absolute_monthly_change, out.width="100%"}
+
+# Calculate the average of monthly bikes hired from 2016 to 2019
+avg_monthly_bikes_hired_2016_2019 <- bike %>% 
+  filter(year >= 2016, year <= 2019) %>% 
+  group_by(month) %>% 
+  summarise(avg_monthly_bikes_hired_2016_2019 = sum(bikes_hired)/n())
+
+# Calculate the average of monthly bikes hired from 2017
+avg_monthly_bikes_hired_2017 <- bike %>% 
+  filter(year >= 2017) %>% 
+  group_by(year, month) %>% 
+  summarise(avg_monthly_bikes_hired_2017 = sum(bikes_hired)/n())
+
+# Merge the data so it's easier to plot it
+final_data <- merge(avg_monthly_bikes_hired_2016_2019, avg_monthly_bikes_hired_2017, by = "month") %>% 
+  mutate(diff = avg_monthly_bikes_hired_2017 - avg_monthly_bikes_hired_2016_2019)
+
+# Each geom_line is for the averages, geom_ribbon is to shade the area enclosed between these lines.
+ggplot(final_data, aes(x = month, group = year)) +
+  geom_line(aes(y=avg_monthly_bikes_hired_2017)) +
+  geom_line(aes(y=avg_monthly_bikes_hired_2016_2019), color = "blue", size = 1) + 
+  geom_ribbon(aes( ymin = avg_monthly_bikes_hired_2017,
+                   ymax = pmax(avg_monthly_bikes_hired_2016_2019, avg_monthly_bikes_hired_2017)), fill = "red", alpha=0.5) +
+  geom_ribbon(aes( ymin = avg_monthly_bikes_hired_2016_2019,
+                   ymax = pmax(avg_monthly_bikes_hired_2016_2019, avg_monthly_bikes_hired_2017)), fill = "green", alpha=0.5) +
+  scale_fill_manual(values=c("red", "green"), name="fill") +
+  facet_wrap(~year) +
+  theme(legend.position="none") + 
+  theme_minimal() +
+  labs(title = "Montly changes in Tfl bike rentals",
+       subtitle = "Change from montly average shown in blue and calculated between 2016-2019",
+       x = NULL,
+       y = "Bike rentals")
+```
+
+Now, let's examine the percentage changes from the expected level of
+weekly rentals.
+
+```{r tfl_percent_change_output}
+# Calculate the average of weekly bikes hired from 2016 to 2019
+avg_weekly_bikes_hired_2016_2019 <- bike %>% 
+  filter(year >= 2016, year <= 2019) %>% 
+  group_by(week) %>% 
+  summarise(avg_weekly_bikes_hired = sum(bikes_hired)/n())
+
+# Calculate the percentage change in average weekly bikes hired from 2017 and clean the data by removing the 52nd week of 2022 data
+avg_weekly_bikes_hired_2017 <- bike %>% 
+  filter(year >= 2017) %>% 
+  group_by(year, week) %>% 
+  summarise(avg_weekly_bikes_hired = sum(bikes_hired)/n()) %>% 
+  mutate(pct_change = 100*(avg_weekly_bikes_hired/avg_weekly_bikes_hired_2016_2019[week, 2] - 1)) %>% 
+  filter(!(year == 2022 & week == 52))
+
+# Plot the %change in the weekly bikes hired against each week
+plot1 <- ggplot(avg_weekly_bikes_hired_2017, aes(x = week)) +
+  geom_rect(aes(xmin = 14, xmax = 26, ymin = -Inf, ymax = Inf),
+            alpha = 1/5, fill = "#e0e0e0") +
+  geom_rect(aes(xmin = 40, xmax = 52, ymin = -Inf, ymax = Inf),
+            alpha = 1/5, fill = "#e0e0e0") +
+  geom_line(data = avg_weekly_bikes_hired_2017,
+            mapping = aes(x = week,
+                          y = pct_change$avg_weekly_bikes_hired)) +
+  geom_ribbon(aes(x = week, 
+                   ymin = pmin(pct_change$avg_weekly_bikes_hired, 0), 
+                   ymax = pmin(pct_change$avg_weekly_bikes_hired,100)), fill = "green") +
+  geom_ribbon(aes(x = week, 
+                   ymin = pmax(pct_change$avg_weekly_bikes_hired, 0), 
+                   ymax = pmin(pct_change$avg_weekly_bikes_hired,100)), fill = "red") +
+  geom_rug(data = subset(avg_weekly_bikes_hired_2017, pct_change$avg_weekly_bikes_hired <= 0),
+             aes(x = week, color = "green"), inherit.aes = F) +
+  geom_rug(data = subset(avg_weekly_bikes_hired_2017, pct_change$avg_weekly_bikes_hired > 0),
+             aes(x = week, color = "red"), inherit.aes = F) +
+  facet_wrap(~year) +
+  labs(title = "Weekly changes in Tfl bike rentals",
+       subtitle = "% change from weekly averages calculated between 2016-2019",
+       x = "week",
+       y = NULL) +
+  theme_minimal() +
+  theme(legend.position = "none")
+plot1
+```
+
+For both of these graphs, let's calculate the expected number of rentals
+per week or month between 2016-2019 and then, see how each week/month of
+2020-2022 compares to the expected rentals. Think of the calculation
+`excess_rentals = actual_rentals - expected_rentals`.
+
+```{r excess_rentals}
+# Calculate the expected median monthly bikes hired
+expected_monthly_bikes_hired_2016_2019 <- bike %>% 
+  filter(year >= 2016, year <= 2019) %>% 
+  group_by(month) %>% 
+  summarise(expected_monthly_bikes_hired = mean(bikes_hired))
+
+# Calculate the actual median monthly bikes hired
+actual_monthly_bikes_hired_2020_22 <- bike %>% 
+  filter(year >= 2020) %>% 
+  group_by(year, month) %>% 
+  summarise(actual_monthly_bikes_hired = mean(bikes_hired))
+
+# Calculate the excess monthly bikes hired
+excess_monthly_rentals_data <- merge(expected_monthly_bikes_hired_2016_2019, actual_monthly_bikes_hired_2020_22, by = "month") %>% 
+  mutate(excess_monthly_rentals = actual_monthly_bikes_hired - expected_monthly_bikes_hired) %>% 
+  arrange(year, month)
+
+ggplot(excess_monthly_rentals_data, 
+       aes(x = month, y = excess_monthly_rentals, group = year)) + 
+  geom_line() + 
+  facet_wrap(~year) + 
+  labs(title = "Excess Monthly rentals from 2020-2022",
+       x = "month",
+       y = "Excess rentals") +
+  theme_minimal()
+
+# Calculate the expected median weekly bikes hired
+expected_weekly_bikes_hired_2016_2019 <- bike %>% 
+  filter(year >= 2016, year <= 2019) %>% 
+  group_by(week) %>% 
+  summarise(expected_weekly_bikes_hired = mean(bikes_hired))
+
+# Calculate the actual weekly median bikes hired
+actual_weekly_bikes_hired_2020_22 <- bike %>% 
+  filter(year >= 2020) %>% 
+  group_by(year, week) %>% 
+  summarise(actual_weekly_bikes_hired = mean(bikes_hired)) %>%
+  filter(!(year == 2022 & week == 52))
+
+# Calculate the excess weekly bikes hired
+excess_weekly_rentals_data <- merge(expected_weekly_bikes_hired_2016_2019, actual_weekly_bikes_hired_2020_22, by = "week") %>% 
+  mutate(excess_weekly_rentals = actual_weekly_bikes_hired - expected_weekly_bikes_hired) %>% 
+  arrange(year, week)
+
+ggplot(excess_weekly_rentals_data, 
+       aes(x = week, y = excess_weekly_rentals, group = year)) + 
+  geom_line() + 
+  facet_wrap(~year) + 
+  labs(title = "Excess Weekly rentals from 2020-2022",
+       x = "week",
+       y = "Excess rentals") +
+  theme_minimal()
+
+```
+
+You might wonder, why we took mean as our expected rentals parameter
+rather than a median. As the data from 2016 to 2019 is uniform, mean can
+be used for the expected rentals calculation. But in presence of any
+outliers, as the year 2020, it's much more efficient to take median in
+the expected rentals.
