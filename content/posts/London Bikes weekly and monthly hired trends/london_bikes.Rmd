@@ -11,7 +11,7 @@ output:
     toc: yes
     toc_float: yes
     code_folding: show
-featuredImage: "featured-image.jpeg"
+featuredImage: "./featured-image.jpeg"
 featuredImagePreview: "featured-image.jpeg"
 editor_options: 
   markdown: 
