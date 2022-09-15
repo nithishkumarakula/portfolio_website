@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
   message = FALSE, 
   warning = FALSE, 
   echo = FALSE,
-  tidy=TRUE,     # display code as typed
+  tidy=FALSE,     # display code as typed
   size="small")   # slightly smaller font for code
 options(digits = 3)
 
