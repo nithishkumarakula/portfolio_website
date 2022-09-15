@@ -3,8 +3,6 @@ title: "Excess rentals in TfL bike sharing"
 author: "Nithish Kumar"
 date: "`r Sys.Date()`"
 tags: ["Markdown"]
-featuredImage: "featured-image.jpg"
-featuredImagePreview: "featured-image.jpeg"
 output:
   html_document:
     theme: flatly

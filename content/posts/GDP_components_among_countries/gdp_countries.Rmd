@@ -1,0 +1,209 @@
+---
+title: "Excess rentals in TfL bike sharing"
+author: "Nithish Kumar"
+date: "`r Sys.Date()`"
+tags: ["Markdown"]
+output:
+  html_document:
+    theme: flatly
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, setup, echo=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  echo = FALSE,
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+```{r load-libraries, echo=FALSE}
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(GGally)
+library(readxl)
+library(here)
+library(skimr)
+library(janitor)
+library(broom)
+library(tidyquant)
+library(infer)
+library(openintro)
+```
+
+Let's look at the GDP data from the [United Nations' National Accounts
+Main Aggregates Database](https://unstats.un.org/unsd/snaama/Downloads),
+which contains estimates of total GDP and its components for all
+countries from 1970 to today. At the risk of oversimplifying things, the
+main components of gross domestic product, GDP are personal consumption
+(C), business investment (I), government spending (G) and net exports
+(exports - imports).
+
+We will look at how GDP and its components have changed over time, and
+compare different countries and how much each component contributes to
+that country's GDP.
+
+```{r read_GDP_data, echo=FALSE, results='hide'}
+
+UN_GDP_data  <-  read_excel(here::here("content/posts/GDP_components_among_countries/data", "Download-GDPconstant-USD-countries.xls"), # Excel filename
+                sheet="Download-GDPconstant-USD-countr", # Sheet name
+                skip=2) # Number of rows to skip
+
+```
+
+First Let's load the data and tidy it. Let's compare the GDP changes for
+United States, Germany and India.
+
+```{r reshape_GDP_data, echo=FALSE, results='hide'}
+
+tidy_GDP_data  <- UN_GDP_data %>% 
+  # Pivot data into longer format
+  pivot_longer(cols = "1970":"2017", 
+               names_to = "year", 
+               values_to = "value") %>% 
+  # Express figures in billions
+  mutate(value = value / 10^9) %>% 
+  # Rename indicators
+  mutate(IndicatorName = case_when(
+    IndicatorName == "Exports of goods and services" ~ "Exports",
+    IndicatorName == "Imports of goods and services" ~ "Imports",
+    IndicatorName == "Gross capital formation" ~ "Gross_capital_formation",
+    IndicatorName == "General government final consumption expenditure" ~ "Government_expenditure",
+    IndicatorName == "Household consumption expenditure (including Non-profit institutions serving households)" ~  "Household_expenditure",
+    IndicatorName == "Imports of goods and services" ~ "Imports",
+    IndicatorName == "Gross Domestic Product (GDP)" ~ "GDP_from_raw_data",
+    TRUE ~ IndicatorName)
+  )
+
+# Let us compare GDP components for these 3 countries
+country_list <- c("United States","India", "Germany")
+
+```
+
+Firstly, let's see how each GDP components has changed for these 3
+countries since 1970.
+
+```{r gdp1_plot, out.width="100%"}
+tidy_GDP_data %>% 
+  # Only consider selected countries
+  filter(Country %in% country_list) %>% 
+  # Only consider selected indicator names
+  filter(IndicatorName %in% c("Gross_capital_formation", "Exports", "Government_expenditure", "Household_expenditure", "Imports")) %>% 
+  # Plot the graph, group according to IndicatorName to receive one line per indicator
+  ggplot(aes(x = year, y = value, group = IndicatorName, color = IndicatorName)) + 
+    geom_line() + 
+    facet_wrap(~ Country) + 
+  theme_bw() + 
+  labs(title = "GDP components over time", 
+       subtitle = "In constant 2010 USD", 
+       y = "Billion USD", 
+       x = NULL)
+
+```
+
+Now, let's compare the GDP and its breakdown at constant 2010 prices in
+US Dollars for United States, India and Germany.
+
+```{r gdp2_plot, out.width="100%"}
+tidy_GDP_data2 <- tidy_GDP_data %>% 
+  filter(IndicatorName %in% c("Gross_capital_formation", "Exports", "Government_expenditure", "Household_expenditure", "Imports", "GDP_from_raw_data")) %>% 
+  filter(Country %in% country_list) %>% 
+  # Pivot wider to calculate Net Exports
+  pivot_wider(names_from = IndicatorName, 
+              values_from = value) %>% 
+  mutate(Net_exports = Exports - Imports) %>% 
+  # Deselect Exports and Imports because they are no longer needed
+  select(-Exports, -Imports) %>% 
+  # Calculate the GDP based on its components
+  mutate(GDP_calculated = Gross_capital_formation + Net_exports + Government_expenditure + Household_expenditure)
+
+# Find out % difference between calculated GDP and GDP from raw data
+tidy_GDP_data2 %>% 
+  summarise(sum_GDP_raw_data = sum(GDP_from_raw_data), 
+            sum_GDP_calculated = sum(GDP_calculated)) %>% 
+  mutate(difference = sum_GDP_calculated/sum_GDP_raw_data-1)
+
+# Continue with plot
+tidy_GDP_data3 <- tidy_GDP_data2 %>% 
+  # Calculate GDP component values as percentages of total GDP
+  mutate(Household_expenditure = Household_expenditure / GDP_calculated, 
+         Government_expenditure = Government_expenditure / GDP_calculated, 
+         Gross_capital_formation = Gross_capital_formation / GDP_calculated, 
+         Net_exports = Net_exports / GDP_calculated) %>% 
+  select(-GDP_from_raw_data, -GDP_calculated) %>% 
+  # Pivot longer to facilitate plotting
+  pivot_longer(cols = Household_expenditure:Net_exports, 
+               names_to = "indicator", 
+               values_to = "value")
+
+# Plot the data
+ggplot(tidy_GDP_data3, aes(x = year, y = value, group = indicator, color = indicator)) + 
+  geom_line() + 
+  facet_wrap(~Country) + 
+  theme_bw() + 
+  # Set labels to percentages
+  scale_y_continuous(labels = scales::percent) + 
+  labs(title = "GDP and its breakdown at constant 2010 prices in US Dollars", 
+       y = "Proportion", 
+       x = NULL)
+
+head(tidy_GDP_data3)
+```
+
+These are our observations from keenly observing these graphs for United
+States, Germany and India.
+
+1.  In Germany, the only GDP component that has been growing for the
+    past 20 years is net exports. This indicates that German economic
+    growth is fueled by exporting more than importing. Government
+    expenditure is relatively stable. This indicates that the government
+    isn't investing heavily in the moment, which is sadly true and which
+    explains why Germany is very backward in terms of internet access
+    and future technology adoption (like 5G networks). Gross capital
+    formation (also called "investment") has been going down lightly for
+    the past 50 years, indicating that German businesses don't invest as
+    heavily as they used to. Relative German household expenditure has
+    been stable. This makes sense when considering that the German
+    population isn't growing, it is rather shrinking and only an
+    immigration influx has been stablilizing it.
+
+2.  The chart looks very different for India. There, relative household
+    expenditure has dropped from around 70% in 1970 to around 55%. In
+    the same time period, gross capital formation has been going up by
+    15%. This indicates that Indian companies are investing heavily at
+    the moment. Furthermore, government expenditure has been mostly
+    stable at around 10%, which is half as much as Germany. The
+    frugality of the Indian government probably stems from the fact that
+    India is not yet as highly developed as Germany. Interestingly, net
+    exports has been mostly negative in the past 50 years. This
+    indicates that India is reliant on imports from other countries
+    because they import more than they export.
+
+3.  In the US, the component that is growing the most is household
+    expenditure, now at about 70%. In Germany, this is currently only
+    55%. This indicates that the US economy focuses more on producing
+    for their own population compared to Germany focusing a bit more on
+    exporting goods. This makes sense as the US market is extremely
+    strong. In addition, the US have negative net exports, currently at
+    around -5%. Relative government expenditure has been decreasing,
+    from around 25% in 1970 to around 15% in 2016. In Germany, this
+    value is at around 20% in 2016. This indicates that the US isn't
+    investing heavily at the moment, growth rather stems from household
+    expenditure.

@@ -1,0 +1,90 @@
+---
+title: "Excess rentals in TfL bike sharing"
+author: "Nithish Kumar"
+date: "2022-09-15"
+tags: ["Markdown"]
+output:
+  html_document:
+    theme: flatly
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+
+
+<p>Let’s look at the GDP data from the <a href="https://unstats.un.org/unsd/snaama/Downloads">United Nations’ National Accounts
+Main Aggregates Database</a>,
+which contains estimates of total GDP and its components for all
+countries from 1970 to today. At the risk of oversimplifying things, the
+main components of gross domestic product, GDP are personal consumption
+(C), business investment (I), government spending (G) and net exports
+(exports - imports).</p>
+<p>We will look at how GDP and its components have changed over time, and
+compare different countries and how much each component contributes to
+that country’s GDP.</p>
+<p>First Let’s load the data and tidy it. Let’s compare the GDP changes for
+United States, Germany and India.</p>
+<p>Firstly, let’s see how each GDP components has changed for these 3
+countries since 1970.</p>
+<p><img src="/posts/GDP_components_among_countries/gdp_countries_files/figure-html/gdp1_plot-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>Now, let’s compare the GDP and its breakdown at constant 2010 prices in
+US Dollars for United States, India and Germany.</p>
+<pre><code>## # A tibble: 1 × 3
+##   sum_GDP_raw_data sum_GDP_calculated difference
+##              &lt;dbl&gt;              &lt;dbl&gt;      &lt;dbl&gt;
+## 1          671375.            676204.    0.00719</code></pre>
+<p><img src="/posts/GDP_components_among_countries/gdp_countries_files/figure-html/gdp2_plot-1.png" width="100%" style="display: block; margin: auto;" /></p>
+<pre><code>## # A tibble: 6 × 5
+##   CountryID Country year  indicator                  value
+##       &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;                      &lt;dbl&gt;
+## 1       276 Germany 1970  Household_expenditure    0.552  
+## 2       276 Germany 1970  Government_expenditure   0.177  
+## 3       276 Germany 1970  Gross_capital_formation  0.280  
+## 4       276 Germany 1970  Net_exports             -0.00857
+## 5       276 Germany 1971  Household_expenditure    0.561  
+## 6       276 Germany 1971  Government_expenditure   0.182</code></pre>
+<p>These are our observations from keenly observing these graphs for United
+States, Germany and India.</p>
+<ol style="list-style-type: decimal">
+<li><p>In Germany, the only GDP component that has been growing for the
+past 20 years is net exports. This indicates that German economic
+growth is fueled by exporting more than importing. Government
+expenditure is relatively stable. This indicates that the government
+isn’t investing heavily in the moment, which is sadly true and which
+explains why Germany is very backward in terms of internet access
+and future technology adoption (like 5G networks). Gross capital
+formation (also called “investment”) has been going down lightly for
+the past 50 years, indicating that German businesses don’t invest as
+heavily as they used to. Relative German household expenditure has
+been stable. This makes sense when considering that the German
+population isn’t growing, it is rather shrinking and only an
+immigration influx has been stablilizing it.</p></li>
+<li><p>The chart looks very different for India. There, relative household
+expenditure has dropped from around 70% in 1970 to around 55%. In
+the same time period, gross capital formation has been going up by
+15%. This indicates that Indian companies are investing heavily at
+the moment. Furthermore, government expenditure has been mostly
+stable at around 10%, which is half as much as Germany. The
+frugality of the Indian government probably stems from the fact that
+India is not yet as highly developed as Germany. Interestingly, net
+exports has been mostly negative in the past 50 years. This
+indicates that India is reliant on imports from other countries
+because they import more than they export.</p></li>
+<li><p>In the US, the component that is growing the most is household
+expenditure, now at about 70%. In Germany, this is currently only
+55%. This indicates that the US economy focuses more on producing
+for their own population compared to Germany focusing a bit more on
+exporting goods. This makes sense as the US market is extremely
+strong. In addition, the US have negative net exports, currently at
+around -5%. Relative government expenditure has been decreasing,
+from around 25% in 1970 to around 15% in 2016. In Germany, this
+value is at around 20% in 2016. This indicates that the US isn’t
+investing heavily at the moment, growth rather stems from household
+expenditure.</p></li>
+</ol>
