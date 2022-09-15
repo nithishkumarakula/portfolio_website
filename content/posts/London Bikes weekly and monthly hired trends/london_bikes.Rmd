@@ -10,11 +10,7 @@ output:
     toc: yes
     toc_float: yes
     code_folding: show
-resources:
-- name: featured-image
-  src: featured-image.jpeg
-- name: featured-image-preview
-  src: featured-image-preview.jpg
+featuredImage: "featured-image.jpeg"
 editor_options: 
   markdown: 
     wrap: 72
