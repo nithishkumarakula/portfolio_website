@@ -19,7 +19,7 @@ editor_options:
 knitr::opts_chunk$set(
   message = FALSE, 
   warning = FALSE, 
-  echo = TRUE,
+  echo = FALSE,
   tidy=FALSE,     # display code as typed
   size="small")   # slightly smaller font for code
 options(digits = 3)
@@ -54,7 +54,7 @@ the bikes hired from the expected monthly and weekly rentals.
 Let's pull the TFL data from their data repository, and perform EDA on
 this.
 
-```{r, get_tfl_data, cache=TRUE, echo=FALSE}
+```{r, get_tfl_data, cache=TRUE, echo=FALSE, results='hide'}
 url <- "https://data.london.gov.uk/download/number-bicycle-hires/ac29363e-e0cb-47cc-a97a-e216d900a6b0/tfl-daily-cycle-hires.xlsx"
 
 # Download TFL data to temporary file
@@ -97,21 +97,33 @@ final_data <- merge(avg_monthly_bikes_hired_2016_2019, avg_monthly_bikes_hired_2
   mutate(diff = avg_monthly_bikes_hired_2017 - avg_monthly_bikes_hired_2016_2019)
 
 # Each geom_line is for the averages, geom_ribbon is to shade the area enclosed between these lines.
-ggplot(final_data, aes(x = month, group = year)) +
-  geom_line(aes(y=avg_monthly_bikes_hired_2017)) +
-  geom_line(aes(y=avg_monthly_bikes_hired_2016_2019), color = "blue", size = 1) + 
-  geom_ribbon(aes( ymin = avg_monthly_bikes_hired_2017,
-                   ymax = pmax(avg_monthly_bikes_hired_2016_2019, avg_monthly_bikes_hired_2017)), fill = "red", alpha=0.5) +
-  geom_ribbon(aes( ymin = avg_monthly_bikes_hired_2016_2019,
-                   ymax = pmax(avg_monthly_bikes_hired_2016_2019, avg_monthly_bikes_hired_2017)), fill = "green", alpha=0.5) +
+ggplot(final_data, 
+       aes(x = month, group = year)) +
+  geom_line(
+    aes(y=avg_monthly_bikes_hired_2017)) +
+  geom_line(
+    aes(y=avg_monthly_bikes_hired_2016_2019), 
+    color = "blue", 
+    size = 1) + 
+  geom_ribbon(
+    aes( ymin = avg_monthly_bikes_hired_2017,
+         ymax = pmax(avg_monthly_bikes_hired_2016_2019,avg_monthly_bikes_hired_2017)),
+    fill = "red",
+    alpha=0.5) +
+  geom_ribbon(
+    aes( ymin = avg_monthly_bikes_hired_2016_2019,
+         ymax = pmax(avg_monthly_bikes_hired_2016_2019, avg_monthly_bikes_hired_2017)), 
+    fill = "green", 
+    alpha=0.5) +
   scale_fill_manual(values=c("red", "green"), name="fill") +
   facet_wrap(~year) +
   theme(legend.position="none") + 
   theme_minimal() +
-  labs(title = "Montly changes in Tfl bike rentals",
-       subtitle = "Change from montly average shown in blue and calculated between 2016-2019",
-       x = NULL,
-       y = "Bike rentals")
+  labs(
+    title = "Montly changes in Tfl bike rentals",
+    subtitle = "Change from montly average shown in blue and calculated between 2016-2019",
+    x = NULL,
+    y = "Bike rentals")
 ```
 
 Now, let's examine the percentage changes from the expected level of
