@@ -5,7 +5,6 @@ date: "`r Sys.Date()`"
 tags: ["Model Analysis", "Markdown"]
 categories: ["Class"]
 
-featuredImage: "featured-image.jpg"
 output:
   html_document:
     theme: flatly
