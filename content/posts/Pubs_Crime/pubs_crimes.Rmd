@@ -49,8 +49,6 @@ library(huxtable)
 Let's load the crimes data and look at the aggregated stats along with the distribution of criminals according to the region_name. 
 ```{r load_data, echo=FALSE, results='hide'}
 crime <- read_csv(here::here('content/posts/Pubs_Crime/data', 'beerhall.csv'))
-my_Palette = c('#00429d', '#2e59a8', '#4771b2', '#5d8abd', '#73a2c6', '#8abccf', '#a5d5d8', '#c5eddf', '#ffffe0')
-
 ```
 
 ```{r boxplot1, out.width="100%"}
