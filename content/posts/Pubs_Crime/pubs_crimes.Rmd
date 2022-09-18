@@ -5,11 +5,6 @@ date: "`r Sys.Date()`"
 tags: ["Model Analysis", "Markdown"]
 categories: ["Class"]
 featuredImage: "featured-image.jpg"
-image:
-  placement: 1
-  caption: 'Your caption here.'
-  focal_point: ''
-  preview_only: false
 output:
   html_document:
     theme: flatly
