@@ -4,7 +4,9 @@ author: "Nithish Kumar"
 date: "`r Sys.Date()`"
 tags: ["Model Analysis", "Markdown"]
 categories: ["Class"]
-images: ["featured-image.jpg"]
+resources:
+- name: featured-image
+  src: featured-image.jpg
 output:
   html_document:
     theme: flatly
