@@ -48,7 +48,7 @@ library(huxtable)
 
 
 ```{r load_image, echo=FALSE}
-knitr::include_graphics(here::here("static", "pubs.jpeg"))
+knitr::include_graphics(here::here("assets/images", "pubs.jpeg"))
 ```
 
 
