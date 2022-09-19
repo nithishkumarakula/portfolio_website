@@ -4,6 +4,7 @@ author: "Nithish Kumar"
 date: "`r Sys.Date()`"
 tags: ["TFL", "Markdown"]
 categories: ["Assignment"]
+featuredImagePreview: "boris-bike.jpeg"
 output:
   html_document:
     theme: flatly

@@ -4,6 +4,7 @@ author: "Nithish Kumar"
 date: "`r Sys.Date()`"
 tags: ["Markdown", "GDP"]
 categories: ["Assignment"]
+featuredImagePreview: "gdp.png"
 output:
   html_document:
     theme: flatly
