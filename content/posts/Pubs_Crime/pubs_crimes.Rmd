@@ -46,6 +46,11 @@ library(GGally)
 library(huxtable)
 ```
 
+```{r load_image, echo=FALSE}
+knitr::include_graphics(here::here("content/posts/Pubs_Crime/images", "pubs.jpeg"), error = FALSE)
+```
+
+
 Let's load the crimes data and look at the aggregated stats along with the distribution of criminals according to the region_name. 
 ```{r load_data, echo=FALSE, results='hide'}
 crime <- read_csv(here::here('content/posts/Pubs_Crime/data', 'beerhall.csv'))
