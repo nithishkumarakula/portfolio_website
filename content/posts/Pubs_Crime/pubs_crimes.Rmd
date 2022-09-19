@@ -46,8 +46,9 @@ library(GGally)
 library(huxtable)
 ```
 
+
 ```{r load_image, echo=FALSE}
-knitr::include_graphics(here::here("content/posts/Pubs_Crime/images", "pubs.jpeg"), error = FALSE)
+knitr::include_graphics(here::here("static", "pubs.jpeg"))
 ```
 
 
