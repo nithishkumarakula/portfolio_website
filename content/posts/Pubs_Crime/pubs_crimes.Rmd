@@ -4,6 +4,8 @@ author: "Nithish Kumar"
 date: "`r Sys.Date()`"
 tags: ["Model Analysis", "Markdown"]
 categories: ["Class"]
+featuredImage: "pubs.jpeg"
+featuredPreviewImage: "pubs.jpeg"
 output:
   html_document:
     theme: flatly
@@ -45,12 +47,6 @@ library(ggthemes)
 library(GGally)
 library(huxtable)
 ```
-
-
-```{r load_image, echo=FALSE}
-knitr::include_graphics(here::here("assets/images", "pubs.jpeg"))
-```
-
 
 Let's load the crimes data and look at the aggregated stats along with the distribution of criminals according to the region_name. 
 ```{r load_data, echo=FALSE, results='hide'}
